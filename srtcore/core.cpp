@@ -8663,6 +8663,14 @@ void CUDT::processCtrl(const CPacket &ctrlpkt)
         break;
 
     case UMSG_DROPREQ: // 111 - Msg drop request
+        // dropdata[0..1] are indexed unconditionally below.
+        if (ctrlpkt.getLength() < 2 * sizeof(int32_t))
+        {
+          LOGC(inlog.Warn, log << CONID() << "DROPREQ: payload " << ctrlpkt.getLength()
+                               << " bytes < " << (2 * sizeof(int32_t)) << " - rejecting");
+          return;
+        }
+
         {
             UniqueLock rlock(m_RecvLock);
             m_pRcvBuffer->dropMsg(ctrlpkt.getMsgSeq(using_rexmit_flag), using_rexmit_flag);
